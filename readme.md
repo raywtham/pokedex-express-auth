@@ -23,7 +23,7 @@ The comments in this file are deliberately verbose meant to orientate you to an 
 
 * Using `bcrypt` hash the password before saving all the user data into `users.json`
 
-* Save a cookie session to record that the user is currently logged in then redirect to the root `'/'` endpoint
+* Save a cookie to record that the user is currently logged in then redirect to the root `'/'` endpoint
 
 * Expose a new endpoint that intercepts GET requests to `/users/logout`, which clears the cookie's loggedin status and redirects to `'/'`
 
@@ -31,7 +31,7 @@ The comments in this file are deliberately verbose meant to orientate you to an 
 
 * Point the form to submit data to the route (`/users/login`) using POST method
 
-* Use `bcrypt` to compare the password in the `form` with the password saved in the JSON file. Set the loggedin status in the cookie and redirect to '/' if successful
+* Use `bcrypt` to compare the password in the `form` with the password saved in the JSON file. Save the loggedin status in the cookie and redirect to '/' if successful
 
 ## Further
 
