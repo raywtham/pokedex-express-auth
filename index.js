@@ -148,7 +148,6 @@ app.delete('/:id', (request, response) => {
 
       if (currentPokemon.id === parseInt(inputId, 10)) {
         // convert input id from string to number before saving
-        // updatedPokemon.id = parseInt(updatedPokemon.id, 10);
         obj.pokemon.splice(i, 1);
       }
     }
