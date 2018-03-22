@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pokemon</title>
+  <title>Pokedex</title>
 </head>
 <body>
-  <h1>Hi, you've been here: {{visits}} times!</h1>
-  {{#if logged_in}}
-  <h4>Hi, you're logged in!</h1>
-  {{/if}}
+  <h1>Welcome to the online Pokedex!</h1>
+  {{#each pokemon}}
+    <li>{{this.name}}</li>
+  {{/each}}
 </body>
 </html>
-

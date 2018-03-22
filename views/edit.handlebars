@@ -6,8 +6,7 @@
 </head>
 <body>
   <h4>Editing: {{pokemon.name}}</h4>
-  <form class="pokemon-form" method="POST" action="/edit/{{pokemon.id}}">
-
+  <form class="pokemon-form" method="POST" action="/{{pokemon.id}}?_method=PUT">
     <div class="pokemon-attribute">
       id:<input name="id" type="text" value="{{pokemon.id}}"/>
     </div>
@@ -41,8 +40,7 @@
     <div class="pokemon-attribute">
       spawn_time:<input name="spawn_time" type="text" value="{{pokemon.spawn_time}}"/>
     </div>
-    <input name="submit" type="submit"/>
+    <button name="submit" type="submit">Submit</button>
   </form>
 </body>
 </html>
-

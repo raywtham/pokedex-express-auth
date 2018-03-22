@@ -44,7 +44,7 @@ app.get('/:id/edit', (request, response) => {
 
     // attempt to retrieve the requested pokemon
     let inputId = request.params.id;
-    let pokemon = obj.pokemon.find(currentPokemon => {
+    let pokemon = obj.pokemon.find((currentPokemon) => {
       return currentPokemon.id === parseInt(inputId, 10);
     });
 
@@ -68,7 +68,7 @@ app.get('/:id', (request, response) => {
 
     // attempt to retrieve the requested pokemon
     let inputId = request.params.id;
-    let pokemon = obj.pokemon.find(currentPokemon => {
+    let pokemon = obj.pokemon.find((currentPokemon) => {
       return currentPokemon.id === parseInt(inputId, 10);
     });
 
@@ -100,7 +100,7 @@ app.post('/', (request, response) => {
     let newPokemon = request.body;
     obj.pokemon.push(newPokemon);
 
-    jsonfile.writeFile(FILE, obj, err2 => {
+    jsonfile.writeFile(FILE, obj, (err2) => {
       if (err2) console.error(err2);
       response.render('home', { pokemon: obj.pokemon });
     });
@@ -128,7 +128,7 @@ app.put('/:id', (request, response) => {
     }
 
     // save pokedex object in pokedex.json file
-    jsonfile.writeFile(FILE, obj, err2 => {
+    jsonfile.writeFile(FILE, obj, (err2) => {
       if (err2) console.error(err2);
 
       // redirect to GET /:id
@@ -142,6 +142,4 @@ app.put('/:id', (request, response) => {
  * Listen to requests on port 3000
  * ===================================
  */
-app.listen(3000, () =>
-  console.log('~~~ Tuning in to the waves of port 3000 ~~~')
-);
+app.listen(3000, () => console.log('~~~ Tuning in to the waves of port 3000 ~~~'));
