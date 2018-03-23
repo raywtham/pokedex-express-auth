@@ -38,3 +38,9 @@ The comments in this file are deliberately verbose meant to orientate you to an 
 * Show 'Hi, you're logged in!' in home only if the user is logged in
 
 * Show 2 buttons only if the user is not logged in: one which sends the user to the register page and another which sends them to the login page
+
+## Further (refactor)
+
+* refactor your app to be VC (view controller)
+Here is a reference implementation: [https://github.com/wdi-sg/express-reference/tree/mvc](https://github.com/wdi-sg/express-reference/tree/mvc)
+* if you want to look at the changes, you can look at this link: https://github.com/wdi-sg/express-reference/compare/auth...mvc?expand=1
