@@ -31,8 +31,10 @@ The comments in this file are deliberately verbose meant to orientate you to an 
 
 * Point the form to submit data to the route (`/users/login`) using POST method
 
-* Use `bcrypt` to compare the password in the `form` with the password saved in the JSON file. Save the loggedin status in the cookie and redirect to '/' if successful
+* Use `bcrypt` to compare the password in the `form` with the password saved in the JSON file. Save the loggedin status in the cookie and redirect to `'/'` if successful
 
 ## Further
 
-\* \* \*
+* Show 'Hi, you're logged in!' in home only if the user is logged in
+
+* Show 2 buttons only if the user is not logged in: one which sends the user to the register page and another which sends them to the login page
