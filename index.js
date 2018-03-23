@@ -3,6 +3,8 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
 
 const FILE = 'pokedex.json';
 
@@ -27,6 +29,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Set up method-override for PUT and DELETE forms
 app.use(methodOverride('_method'));
+
+app.use(cookieParser());
 
 /**
  * ===================================
@@ -62,6 +66,25 @@ app.get('/:id/edit', (request, response) => {
   });
 });
 
+
+app.get('/users', (request, response) => {
+  jsonfile.readFile('users.json', (err, obj) => {
+    let users = [];
+    if (obj) {
+      let keys = Object.keys(obj);
+      for (let i in keys) {
+        users.push(keys[i]);
+      }
+    }
+    console.log(users);
+    let context = {
+      users: users
+    };
+
+    response.render('users', context);
+  });
+});
+
 app.get('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
@@ -89,7 +112,12 @@ app.get('/:id', (request, response) => {
 app.get('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
-    response.render('home', { pokemon: obj.pokemon });
+    let context = {
+      pokemon: obj.pokemon,
+      login: request.cookies.login
+    };
+    // console.log(typeof(request.cookies.login));
+    response.render('home', context);
   });
 });
 
@@ -136,6 +164,7 @@ app.put('/:id', (request, response) => {
   });
 });
 
+
 app.delete('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
@@ -161,6 +190,68 @@ app.delete('/:id', (request, response) => {
   });
 });
 
+
+
+app.get('/users/new', (request, response) => {
+  // send response with some data
+  response.render('new_user');
+});
+
+app.post('/users', (request, response) => {
+  let username = request.body.username;
+  let password = request.body.password;
+  // console.log(request.body.username);
+  bcrypt.hash(password, 1, (err, hash) => {
+
+    jsonfile.readFile('users.json', (err, obj) => {
+      if (obj) {
+        obj[username] = hash;
+      }
+      else {
+        obj = {};
+        obj[username] = hash;
+      }
+      // console.log("obj: ", obj);
+      jsonfile.writeFile('users.json', obj, (err) => {
+        if (err) console.log(err);
+        response.cookie('login', true);
+        response.redirect("/");
+      });
+    });
+  });
+});
+
+app.post('/users/logout', (request, response) => {
+  // response.cookie('login');
+  response.clearCookie('login');
+  response.redirect("/");
+});
+
+app.get(`/users/login`, (request, response) => {
+  response.render('login');
+});
+
+app.post('/users/login', (request, response) => {
+  let textPassword = request.body.password;
+  let username = request.body.username;
+  jsonfile.readFile('users.json', (err, obj) => {
+    let hashPassword = obj[username];
+    bcrypt.compare(textPassword, hashPassword, (err, res) => {
+      if (res) {
+        console.log('here');
+        response.cookie('login', true);
+        response.redirect("/");
+      }
+      else {
+        console.log('there');
+
+        response.clearCookie('login');
+        response.redirect("/users/login");
+      }
+    })
+
+  });
+});
 /**
  * ===================================
  * Listen to requests on port 3000
