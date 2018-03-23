@@ -6,8 +6,20 @@
 </head>
 <body>
   <h1>Welcome to the online Pokedex!</h1>
+  {{#if status}}
+  		<h2>Hi!, you're logged in!</h2>
+  {{else}}
+  	<form method="get" action="/users/new"> 
+  		<input type="submit" name="signUp" value="Sign Up">
+  	</form>
+  	<form method="get" action="/users/login">
+  		<input type="submit" name="login" value="login">
+  	</form>
+  {{/if}}
+
   {{#each pokemon}}
     <li>{{this.name}}</li>
   {{/each}}
+
 </body>
 </html>
