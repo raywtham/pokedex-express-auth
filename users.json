@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "username": "lajansa",
+      "passwordHash": "$2a$10$3eaERofjhjD15l45GDyHdOl2BSPEZwJZ/9Xo5OCZEh0Qc2seS9I7e"
+    },
+    {
+      "username": "laj",
+      "passwordHash": "$2a$10$Y6.xQo6Sgx9CCM90x7ORGe0NVehCiJYrFI8QbIyXle3OX7OOzdxuK"
+    }
+  ]
+}

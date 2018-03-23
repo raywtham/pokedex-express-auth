@@ -3,8 +3,15 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const bcrypt = require('bcrypt');
+const cookieParser = require("cookie-parser");
 
 const FILE = 'pokedex.json';
+const USERFILE = 'users.json';
+let userDB;
+jsonfile.readFile(USERFILE, (err, obj) => {
+  userDB = obj;
+})
 
 /**
  * ===================================
@@ -28,11 +35,62 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Set up method-override for PUT and DELETE forms
 app.use(methodOverride('_method'));
 
+app.use(cookieParser());
+
 /**
  * ===================================
  * Routes
  * ===================================
  */
+
+app.get('/users/new', (request, response) => {
+  response.render('new_user');
+})
+
+app.post('/users', (request, response) => {
+  let usernameInput = request.body.username;
+  let passwordInput = request.body.password;
+  let userObj = {};
+  bcrypt.hash(passwordInput, 10, (err, hash) => {
+    userObj["username"] = usernameInput;
+    userObj["passwordHash"] = hash;
+    userDB.users.push(userObj);
+    jsonfile.writeFile(USERFILE, userDB, {spaces: 2}, (err) => {
+      if (err) {
+        console.log(err);
+      }
+    })
+  })
+  response.cookie('loggedIn', true);
+  response.redirect('/');
+})
+
+app.get('/users/login', (request, response) => {
+  response.render('login');
+})
+
+app.post('/users/login', (request, response) => {
+  let usernameInput = request.body.username;
+  let passwordInput = request.body.password;
+  let user = userDB.users.find((user) => {
+    return user.username === usernameInput;
+  });
+
+  bcrypt.compare(passwordInput, user.passwordHash, function(err, auth) {
+    if (auth === true) {
+      response.cookie('loggedIn', true);
+      response.redirect('/');
+    } else {
+      response.send("Invalid password");
+    }
+  })
+})
+
+app.get('/users/logout', (request, response) => {
+  response.clearCookie("loggedIn");
+  response.redirect('/');
+})
+
 app.get('/new', (request, response) => {
   // send response with some data
   response.render('new');
@@ -87,9 +145,17 @@ app.get('/:id', (request, response) => {
 });
 
 app.get('/', (request, response) => {
+  let loggedIn;
+  if ("loggedIn" in request.cookies) {
+    loggedIn = true; 
+  } else {
+    loggedIn = false;
+  };
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
-    response.render('home', { pokemon: obj.pokemon });
+    response.render('home', { pokemon: obj.pokemon,
+                              user: {"logged_in": loggedIn},
+                            });
   });
 });
 
