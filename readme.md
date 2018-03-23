@@ -19,7 +19,7 @@ The comments in this file are deliberately verbose meant to orientate you to an 
 
 * Expose a new endpoint that intercepts GET requests to `/users/new`, which responds with a HTML page with a new user registration `form` that has these fields: `name` and `password`
 
-* Point the form to submit data to the route (`/users/new`) using POST method
+* Point the form to submit data to the route (`/users`) using POST method
 
 * Using `bcrypt` hash the password before saving all the user data into `users.json`
 
