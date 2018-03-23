@@ -2,7 +2,7 @@
 
 For this exercise, we will continue building our Pokedex web app - setting up our server to allow users to register and login with authentication.
 
-The starter code in this repository builds upon the previous exercise's ([pokedex-express](https://github.com/wdi-sg/pokedex-express)).
+The starter code in this repository builds upon the previous exercise's ([pokedex-express](https://github.com/wdi-sg/pokedex-express-update-delete)).
 
 ## Getting Started
 
