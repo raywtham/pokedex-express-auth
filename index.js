@@ -3,8 +3,11 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 const FILE = 'pokedex.json';
+const USERFILE = 'users.json';
 
 /**
  * ===================================
@@ -28,11 +31,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Set up method-override for PUT and DELETE forms
 app.use(methodOverride('_method'));
 
+// Set up cookie-parser
+app.use(cookieParser());
+
 /**
  * ===================================
  * Routes
  * ===================================
  */
+
+//GET methods
+//create signup form
+app.get('/users/new', (request,response) => {
+  response.render('signUp');
+});
+
+//create login form
+app.get('/users/login', (request,response) => {
+  response.render('login');
+});
+
+app.get('/users/logout', (request,response) => {
+  response.cookie('logged_in', 'false');
+  response.redirect("/");
+});
+
 app.get('/new', (request, response) => {
   // send response with some data
   response.render('new');
@@ -89,10 +112,15 @@ app.get('/:id', (request, response) => {
 app.get('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
-    response.render('home', { pokemon: obj.pokemon });
+    let context = {
+      pokemon: obj.pokemon,
+      status: false
+    }
+    response.render('home', context);
   });
 });
 
+//OTHER methods
 app.post('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
@@ -157,6 +185,61 @@ app.delete('/:id', (request, response) => {
 
       // redirect to GET /:id
       response.redirect('/');
+    });
+  });
+});
+
+app.post('/users', (request,response) => {
+  let info = request.body;
+  //delete submit
+  delete info["submit"];
+  console.log(info);
+
+  bcrypt.hash(info.password, 10, (err, hash) => {
+    console.error(err);
+    console.log(hash);
+    info.password = hash;
+    console.log(info);
+
+    jsonfile.writeFile(USERFILE,info,err2 =>{
+      if (err2) console.error(err2);
+      response.cookie('logged_in', 'true');
+      response.redirect("/");
+    })
+  });
+});
+
+app.post('/users/login', (request,response) => {
+  
+  jsonfile.readFile(USERFILE, (err,obj) => {
+    if (err) console.log(err);
+    console.log(obj);
+    //current input
+    let info = request.body;
+    //delete submit
+    delete info["submit"];
+    bcrypt.hash(info.password, 20, (err2, hash) => {
+      info.password = hash;
+    });
+
+    //compare with old input
+    bcrypt.compare(info.password,obj.password, function(err3, res) {
+      if (err3) console.error(err3);
+      if(res === true ){
+        response.cookie('logged_in', 'true');
+
+        jsonfile.readFile(FILE, (err4, obj2) => {
+          if (err4) console.error(err4);
+          console.log(obj2.pokemon);
+          let context = {
+            pokemon: obj2.pokemon,
+            status: true
+          }
+          response.render('home', context);
+        });
+      }else{
+        response.redirect("/users/login");
+      }
     });
   });
 });
