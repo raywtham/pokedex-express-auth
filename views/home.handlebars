@@ -6,8 +6,11 @@
 </head>
 <body>
   <h1>Welcome to the online Pokedex!</h1>
-  {{#each pokemon}}
-    <li>{{this.name}}</li>
-  {{/each}}
+  {{#if loggedIn}}
+  <h4>Hi, you are logged in</h4>
+  {{else}}
+  <button onclick="window.location.href='users/login'">Log-In</button>
+  <button onclick="window.location.href='users/new'">Sign-up</button>
+  {{/if}}
 </body>
 </html>
