@@ -5,9 +5,21 @@
   <title>Pokedex</title>
 </head>
 <body>
+
   <h1>Welcome to the online Pokedex!</h1>
+  
+  {{#if login}}
+  	<p>Welcome Back!</p>
+  {{/if}}
+
+  {{#if notlogin}}
+  	<input type=submit name="Register" value="Register" method="GET" action="/users/new" />
+  	<input type=submit name="Login" value="Login" method="GET" action="/users/login" />
+  {{/if}}
+  
   {{#each pokemon}}
     <li>{{this.name}}</li>
   {{/each}}
+
 </body>
 </html>

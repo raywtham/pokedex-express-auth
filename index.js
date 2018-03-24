@@ -3,8 +3,11 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-
+const bcrypt = require('bcrypt');
 const FILE = 'pokedex.json';
+const USERSFILE = 'users.json';
+const cookieParser = require('cookie-parser');
+
 
 /**
  * ===================================
@@ -15,6 +18,7 @@ const FILE = 'pokedex.json';
 // Init express app
 const app = express();
 
+app.use(cookieParser());
 // Set handlebars to be the default view engine
 app.engine('handlebars', handlebars.create().engine);
 app.set('view engine', 'handlebars');
@@ -37,6 +41,11 @@ app.get('/new', (request, response) => {
   // send response with some data
   response.render('new');
 });
+
+app.get('/users/new', (request, response) => {
+
+  response.render("signup");
+})
 
 app.get('/:id/edit', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
@@ -89,9 +98,69 @@ app.get('/:id', (request, response) => {
 app.get('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
-    response.render('home', { pokemon: obj.pokemon });
+
+    var visits = request.cookies['logged_in'];
+    var notlogin = !visits;
+
+    console.log(notlogin);
+    var context ={
+    	pokemon: obj.pokemon,
+    	login: visits,
+    	notlogin: notlogin
+    };
+
+    response.render('home', context);
   });
 });
+
+app.post("/users/login", (request, response)=>{
+
+	let loginPassword = request.body.password;
+
+	let loginEmail = request.body.email;
+
+	bcrypt.hash(loginPassword, 1, (err, hash) => {
+		console.log(hash);
+
+		jsonfile.readFile(USERSFILE, (err, obj) => {
+			if (err) console.error(err);
+
+			for (var i=0; i<obj.users.length; i++){
+
+				if(obj.users[i].email === loginEmail){
+					console.log(obj.users[i].email);
+					console.log(loginEmail);
+					let oldInput = obj.users[i].password;
+					console.log(oldInput);
+
+					bcrypt.compare(loginPassword, oldInput, function(err, res) {
+						if( res === true ){
+							console.log("same");
+							response.cookie("logged_in", "true");
+							response.redirect("/");
+						}  
+						else {
+							console.log("not same");
+							response.send("Password is not correct");
+						}
+					})
+
+				}
+//Question to check: Why I can't include a statement to indicate wrong email?//
+//My whole post route sometimes gives incorrect answer when I include it. Othertimes,
+//it post an error message "Cannot set headers after they are sent to the client"
+///////////////////////////////////////////////////////////////////////////////
+
+				// else {
+				// 	response.send("Wrong email");
+				// 	return console.log("wrong email");
+
+				// 	// response.send("Wrong Email");	// response.send("Done");
+				}
+		})
+	})
+})
+
 
 app.post('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
@@ -135,6 +204,53 @@ app.put('/:id', (request, response) => {
     });
   });
 });
+
+app.get("/users/login", (request, response) => {
+
+  response.render("login")
+})
+
+//New account creation
+
+app.post("/users", (request, response) =>{
+  var plainText = request.body.password;
+
+  var user = request.body;
+    //hash = hashed password (using salt)
+    console.log(request.body.password);
+
+    bcrypt.hash(plainText, 1, (err, hash) => {
+
+      let user = {
+                  name: request.body.name,
+                  email: request.body.email,
+                  password: hash
+                  
+              };
+
+      jsonfile.readFile(USERSFILE, (err, obj) => {
+
+        // console.log(obj);
+        obj.users.push(user);
+        console.log("obj", obj);
+
+        jsonfile.writeFile(USERSFILE, obj, err2 => {
+          if (err2) console.error(err2);
+
+          response.cookie("login", 'true');
+          response.redirect("/")
+
+        })
+      })
+    })
+  })
+
+app.get('/users/logout', (request, response) =>{
+  // request.cookie("login", 'false');
+  response.clearCookie("login");
+  response.redirect("/");
+})
+
 
 app.delete('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
