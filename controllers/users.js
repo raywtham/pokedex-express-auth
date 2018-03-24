@@ -36,17 +36,18 @@ module.exports = {
   checkLogin: (req, res) => {
     let name = req.body.name;
     let password = req.body.password;
-    // console.log(password);
-    bcrypt.hash(password, 1, (err, hash) => {
-      bcrypt.compare(password, hash, (err, results) => {
-        console.log(results);
-        if (results) {
-          res.cookie("loggedin", true);
-          res.redirect("/");
-        } else {
-          res.render("login");
-        }
-      });
+    jsonfile.readFile("users.json", (err, obj) => {
+      let hashDb = obj[name];
+        bcrypt.compare(password, hashDb, (err, results) => {
+          console.log(results);
+          if (results) {
+            res.cookie("loggedin", true);
+            res.redirect("/");
+          } else {
+            res.render("login");
+          }
+        });
     });
+
   }
 }
