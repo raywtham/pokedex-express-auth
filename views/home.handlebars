@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Pokedex</title>
 </head>
+
 <body>
+  <h1>{{logInText}}</h1>
+  {{#if showLoginButtons}}
+  <button type="button" onclick="window.location.href='/users/new'">Register!</button>
+  <button type="button" onclick="window.location.href='/users/login'">Login!</button>
+  {{else}}
+  <button type="button" onclick="window.location.href='/users/logout'">Logout!</button>
+  {{/if}}
   <h1>Welcome to the online Pokedex!</h1>
   {{#each pokemon}}
-    <li>{{this.name}}</li>
+  <li>{{this.name}}</li>
   {{/each}}
 </body>
+
 </html>

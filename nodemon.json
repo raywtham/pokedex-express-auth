@@ -1,0 +1,4 @@
+{   
+      "ignore": ["pokedex.json"],
+      "ignore": ["userDex.json"]
+  }
