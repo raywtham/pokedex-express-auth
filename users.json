@@ -1,0 +1,24 @@
+{
+    "users": [
+        {
+            "name": "jkjkj",
+            "hash": "$2a$10$Ogs7EBgWJk/XR1JoFuXGtev37PMYSsKak2kBzsQCBp8GVe0tTaOBu"
+        },
+        {
+            "name": "hello",
+            "hash": "$2a$10$ujEDk/NLMTch/4qbVtIYK.DBtXNrZP1uF8zNU/505XHIj7fl.OeO2"
+        },
+        {
+            "name": "alethea",
+            "hash": "$2a$10$uDzR//Yc9D6N31a02FE8wObLGjLcMLiAeD.iuHanrOpioJrw/QlDK"
+        },
+        {
+            "name": "hello",
+            "hash": "$2a$10$5S09W1WH350OZ2WvThMsFe7SC1jC53MHMgVYvfNrsBlBmjBQK/3Ge"
+        },
+        {
+            "name": "alethea",
+            "hash": "$2a$10$iX9cM8WTrkd/FFjrN/ERvO5Jx9iHmzojO8z5vE6LqsoSjHmEuaV0C"
+        }
+    ]
+}
