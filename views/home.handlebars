@@ -6,6 +6,18 @@
 </head>
 <body>
   <h1>Welcome to the online Pokedex!</h1>
+  {{#if user.logged_in}}
+    <form method="GET" action="/users/logout">
+      <button type="submit">Log Out</button>
+    </form>
+  {{else}}
+    <form method="GET" action="/users/login">
+      <button type="submit">Log In</button>
+    </form>
+    <form method="GET" action="/users/new">
+      <button type="submit">Sign Up</button>
+    </form>
+  {{/if}}
   {{#each pokemon}}
     <li>{{this.name}}</li>
   {{/each}}
