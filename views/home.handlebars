@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Pokedex</title>
 </head>
+
 <body>
   <h1>Welcome to the online Pokedex!</h1>
+
+  <!-- Show log out button if logged_in value in cookies is true -->
+  {{#if logged_in}}
+    <h2>Hi, you're logged in!~~~</h2>
+    <form action="/users/logout?_method=delete" method="POST">
+      <button type="submit" name="submit">Log Out</button>
+    </form>
+    <br>
+  <!-- Show log in button if logged_in value in cookies is false -->
+  {{else}}
+    <h2>To register => <button type="button" name="button" onclick="window.location.href='/users/new'">Register</button></h2>
+    <!-- To register => <button type="button" name="button" onclick="window.location.href='/users/new'">Register</button> -->
+    <h2>To Login => <button type="button" name="button" onclick="window.location.href='/users/login'">Login</button></h2>
+    <!-- To Login => <button type="button" name="button" onclick="window.location.href='/users/login'">Login</button> -->
+    <br>
+  {{/if}}
+
   {{#each pokemon}}
     <li>{{this.name}}</li>
   {{/each}}
 </body>
+
 </html>
