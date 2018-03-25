@@ -3,8 +3,11 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
 
 const FILE = 'pokedex.json';
+const USERDATA = 'user.json';
 
 /**
  * ===================================
@@ -28,11 +31,89 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Set up method-override for PUT and DELETE forms
 app.use(methodOverride('_method'));
 
+app.use(cookieParser());
+
 /**
  * ===================================
  * Routes
  * ===================================
  */
+
+ // direct to register page
+app.get('/users/new', (request, response) => {
+  response.render('register');
+});
+
+// login page
+app.get('/users/login', (request, response) => {
+  response.render('login');
+});
+
+// logout page
+app.get('/users/logout', (request, response) => {
+  response.clearCookie('loggedIn');
+  response.redirect('/');
+});
+
+// user login page
+app.post('/users/login', (request, response) => {
+  jsonfile.readFile(USERDATA, (err, obj) => {
+    if (err) console.error(err);
+
+    let inputEmail = request.body.email;
+    let inputPassword = request.body.password;
+    let allUserData = obj.user;
+
+    for(let i=0; i<allUserData.length; i++) {
+      // match input email to database
+      if(inputEmail === allUserData[i].email) {
+        // match valid password
+        bcrypt.compare(inputPassword, allUserData[i].password, (err, res) => {
+          if (res === true) {
+            // login successful
+            console.log("Login Successful");
+            response.cookie('loggedIn', 'true');
+            response.redirect('/');
+          } else {
+            // invalid password
+            console.log("Invalid Password");
+            response.send("Invalid Password")
+          }
+        });
+        return inputEmail;
+      } else {
+        // emaill not found in database
+        console.log("Invalid Email");
+        response.send("Invalid Email");
+      }
+    };
+  });
+});
+
+// to receive the registration details into user.json
+app.post('/users', (request, response) => {
+  // read current user.json file
+  jsonfile.readFile(USERDATA, (err, obj) => {
+    if (err) console.error(err);
+
+    let inputEmail = request.body.email;
+    let inputPassword = request.body.password;
+    let hiddenPassword = null;
+    // encrypt password
+    bcrypt.hash(inputPassword, 1, (err, hash) => {
+      hiddenPassword = hash;
+      // push new registration details into user.json
+      obj.user.push({email: inputEmail, password: hiddenPassword});
+      // rewrite update user.json
+      jsonfile.writeFile(USERDATA, obj, {spaces: 2}, err2 => {
+        if (err2) console.error(err2);
+        response.cookie('loggedIn', 'true');
+        response.redirect('/');
+      });
+    });
+  });
+});
+
 app.get('/new', (request, response) => {
   // send response with some data
   response.render('new');
@@ -89,6 +170,7 @@ app.get('/:id', (request, response) => {
 app.get('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
+    obj.loggedin = request.cookies['loggedIn'];
     response.render('home', { pokemon: obj.pokemon });
   });
 });
