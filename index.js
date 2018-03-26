@@ -13,8 +13,8 @@ const methodOverride = require('method-override');
 
 
 // Why does express-validator throw errors with the lodash dependency?! D:
-// const {check, validationResult} = require('express-validator/check');
-// const {matchedData, sanitize} = require('express-validator/filter');
+const {check, validationResult} = require('express-validator/check');
+const {matchedData, sanitize} = require('express-validator/filter');
 
 
 // Hackish way to create a https server in addition to the standard http one, and use the http library to redirect requests to the https one. Courtesy of https://blog.cloudboost.io/everything-about-creating-an-https-server-using-node-js-2fc5c48a8d4e. This method should not be used in production as it adds delays to requests. An nginx/apache server is still needed to run alongside the node.js one to handle the traffic.
@@ -163,33 +163,50 @@ function dbUpdateUser(newUserData) {
 /**
  * Routes
  */
-app.post('/users/login', async function (request, response) {
-    // userInput will have a username and password field
-    let userInput = request.body;
-    let hash = '';
-    let user = {};
-    userModel.findOne({"name": userInput.name}, 'name email password', function(error, savedUser){
-        if (savedUser !== null) {
-            user = savedUser;
-            hash = user.password;
-            bcrypt.compare(userInput.password, hash, function(error, result){
-                if (result) {
-                    bcrypt.hash(user.name, saltRounds, function(error, hash) {
-                        response.cookie('status1', hash, {maxAge: 86400000});
-                        response.cookie('status2', user.email, {maxAge: 86400000});
-                        response.redirect('/');
-                    })
-                } else {
-                    response.send('Wrong password!');
-                }
-            })
-        } else {
-            response.send('User does not exist!');
-        }
-    });
-})
+app.post('/users/login', function (request, response) {
+        // userInput will have a username and password field
+        let userInput = request.body;
+        let hash = '';
+        let user = {};
+        userModel.findOne({"name": userInput.name}, 'name email password', function(error, savedUser){
+            if (savedUser !== null) {
+                user = savedUser;
+                hash = user.password;
+                bcrypt.compare(userInput.password, hash, function(error, result){
+                    if (result) {
+                        bcrypt.hash(user.name, saltRounds, function(error, hash) {
+                            response.cookie('status1', hash, {maxAge: 86400000});
+                            response.cookie('status2', user.email, {maxAge: 86400000});
+                            response.redirect('/');
+                        })
+                    } else {
+                        response.send('Wrong password!');
+                    }
+                })
+            } else {
+                response.send('User does not exist!');
+            }
+        });
+    }
+)
 
-app.post('/users', function (request, response) {
+app.post('/users', [
+    check('name', 'That is a made up name. What is your REAL name?!').trim().isLength({min: 1}), 
+    check('email').isEmail().withMessage('Please enter a valid e-mail address!').normalizeEmail(), 
+    check('password', 'Password must be at least 6 characters long.').isLength({min: 6})
+], function (request, response) {
+    const errors = validationResult(request);
+    let context = {name: '', email: '', password: ''};
+    if (!errors.isEmpty()) {
+        errors.array().forEach(err => {
+            context[err['param']] = err['msg'];
+        });
+        context.nameValue = request.body.name;
+        context.emailValue = request.body.email;
+        context.passwordValue = request.body.password;
+        response.render('register', context);
+        return;
+    };
     // userInput should have 3 keys: name, email, password
     let userInput = request.body;
 
