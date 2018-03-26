@@ -119,14 +119,6 @@ app.post('/users/login', (request, response) => {
     });
 });
 
-app.delete('/users/logout', (request, response) => {
-    logout: (request, response) => {
-        response.clearCookie("logged_in");
-
-        response.redirect(301, '/');
-    }
-});
-
 app.get('/new', (request, response) => {
     // send response with some data
     response.render('new');
@@ -183,7 +175,8 @@ app.get('/:id', (request, response) => {
 app.get('/', (request, response) => {
     jsonfile.readFile(FILE, (err, obj) => {
         if (err) console.error(err);
-        response.render('home', { pokemon: obj.pokemon });
+        obj.logged_in = request.cookies['logged_in'];
+        response.render('home', obj);
     });
 });
 
@@ -255,6 +248,11 @@ app.delete('/:id', (request, response) => {
     });
 });
 
+app.delete('/users/logout', (request, response) => {
+    response.clearCookie("logged_in");
+
+    response.redirect(301, '/');
+});
 
 /**
  * ===================================
