@@ -3,8 +3,10 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const bcrypt = require('bcrypt');
 
 const FILE = 'pokedex.json';
+const USERDATA = 'users.json';
 
 /**
  * ===================================
@@ -92,6 +94,81 @@ app.get('/', (request, response) => {
     response.render('home', { pokemon: obj.pokemon });
   });
 });
+
+app.get('/users/new', (request, response) => {
+  response.render('register');
+});
+
+app.get('/users/login', (request, response) => {
+  response.render('login');
+});
+
+app.post('/users/login', (request, response) => {
+  jsonfile.readFile( USERDATA, ( err, obj ) => {
+    //check if user exit
+    for (let i=0; i<obj.user.length; i++){
+      if (request.body.username == obj.user[i].username){
+        var match = true;
+        var hash = obj.user[i].password;
+      }    
+    }
+
+    //return error if username incorrect
+    if (match == undefined){
+      response.send('Username does not exist.');
+    }
+
+    if (match === true){   //Username exists
+
+      bcrypt.compare(request.body.password, hash, (err, result) => { //run bcryot compare
+          if (result === true) {
+            response.cookie('loggedin', true);
+            response.send('Logged in'); //Pass - Cookie! - Redirect.
+
+          } else {
+            response.send("Log in fail, <a href='/users/login'>Try again</a>");
+            //Fail - Wrong pass
+          }
+      });
+    }
+  });
+});
+
+app.post('/users', (request, response) => {
+  jsonfile.readFile(USERDATA, (err,obj) =>{
+    userid = request.body.username;
+    //read userdata
+    
+    //check if user exist
+    //if exist, err. cannot overwrite
+    for (let i=0; i<obj.user.length; i++){
+      if (userid == obj.user[i].username){
+        response.send('User already exist, please use another name');
+      }
+    }
+
+    //Hash PW
+    bcrypt.hash(request.body.password, 10, (err, hash) => {
+      
+      let userinfo = {
+        username: request.body.username,
+        password: hash
+      }
+    obj.user.push(userinfo);
+
+    jsonfile.writeFile(USERDATA, obj, err2 => {
+      if (err2) console.error(err2);
+
+      // redirect to GET /:id
+      response.redirect('/');
+    //if okay, hash the password,
+    //write username and hash into file
+    //render home
+      });
+    });
+  });
+}); 
+
 
 app.post('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
