@@ -3,9 +3,9 @@ const handlebars = require('express-handlebars');
 const jsonfile = require('jsonfile');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-
+const bcrypt = require('bcrypt');
 const FILE = 'pokedex.json';
-
+const cookieParser = require('cookie-parser')
 /**
  * ===================================
  * Configurations and set up
@@ -21,7 +21,7 @@ app.set('view engine', 'handlebars');
 
 // Set static folder
 app.use(express.static('public'));
-
+app.use(cookieParser())
 // Set up body-parser to automatically parse form data into object
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -33,12 +33,79 @@ app.use(methodOverride('_method'));
  * Routes
  * ===================================
  */
-app.get('/new', (request, response) => {
+ app.get('/users/new', (request, response) => {
+  // send response with some data
+  response.render('form');
+});
+
+ app.get('/users/login', (request, response) => {
+  // send response with some data
+  if(request.cookies.loggedin == 1) {var loggedin = true } else { var loggedin = false}
+    response.render("login", {loggedinf: loggedin,
+      name : request.cookies.username});
+});
+ app.post('/users/login', (request, response) => {
+  // send response with some data
+  jsonfile.readFile('users.json', (err, obj)=>{
+    bcrypt.compare(request.body.password, obj.password, function(err, res) {
+    // res == true
+    if(res == true){ 
+      response.cookie('loggedin','1')
+      response.cookie('username',obj.name)
+      response.redirect('/users')
+    }
+    else{
+      response.redirect('/users/login')
+
+    }
+  });
+
+  })
+});
+
+
+ app.get('/users/logout', (request, response) => {
+  // send response with some data
+  response.cookie('loggedin', '0');
+  response.redirect("/")
+});
+
+ app.get('/users', (request, response) => {
+  // send response with some data
+  if(request.cookies.loggedin == 1) {var loggedin = true } else { var loggedin = false}
+    response.render("users", {loggedinf: loggedin,
+      name : request.cookies.username});
+});
+
+
+
+ app.post('/users', (request, response) => {
+  // send response with some data
+  let obj = {}
+  obj.name =   request.body.name
+  bcrypt.hash(request.body.password, 10, function(err, hash) {
+   console.log(hash)
+   obj.password = hash
+   let FILE = 'users.json'
+   jsonfile.writeFile(FILE,obj,(err)=>{
+    console.log(err)
+    response.cookie('username', request.body.name)
+    response.cookie('loggedin', '1')
+    response.render("users", {name : request.body.name});
+
+  }
+  )
+ })
+});
+
+ app.get('/new', (request, response) => {
   // send response with some data
   response.render('new');
 });
 
-app.get('/:id/edit', (request, response) => {
+
+
+ app.get('/:id/edit', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
 
@@ -62,7 +129,7 @@ app.get('/:id/edit', (request, response) => {
   });
 });
 
-app.get('/:id', (request, response) => {
+ app.get('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
 
@@ -86,14 +153,16 @@ app.get('/:id', (request, response) => {
   });
 });
 
-app.get('/', (request, response) => {
+ app.get('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
+     if(request.cookies.loggedin == 1) {var loggedin = true } else { var loggedin = false}
+
     if (err) console.error(err);
-    response.render('home', { pokemon: obj.pokemon });
+    response.render('home', { pokemon: obj.pokemon,loggedinf : loggedin });
   });
 });
 
-app.post('/', (request, response) => {
+ app.post('/', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
 
@@ -102,12 +171,13 @@ app.post('/', (request, response) => {
 
     jsonfile.writeFile(FILE, obj, err2 => {
       if (err2) console.error(err2);
-      response.render('home', { pokemon: obj.pokemon });
+      if(request.cookies.loggedin == 1) {var loggedin = true } else { var loggedin = false}
+      response.render('home', { pokemon: obj.pokemon, loggedinf : loggedin });
     });
   });
 });
 
-app.put('/:id', (request, response) => {
+ app.put('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
 
@@ -136,7 +206,7 @@ app.put('/:id', (request, response) => {
   });
 });
 
-app.delete('/:id', (request, response) => {
+ app.delete('/:id', (request, response) => {
   jsonfile.readFile(FILE, (err, obj) => {
     if (err) console.error(err);
 
@@ -166,6 +236,6 @@ app.delete('/:id', (request, response) => {
  * Listen to requests on port 3000
  * ===================================
  */
-app.listen(3000, () =>
+ app.listen(3000, () =>
   console.log('~~~ Tuning in to the waves of port 3000 ~~~')
-);
+  );
