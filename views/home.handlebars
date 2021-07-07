@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pokedex</title>
+	<meta charset="UTF-8">
+	<title>Pokedex</title>
 </head>
 <body>
-  <h1>Welcome to the online Pokedex!</h1>
-  {{#each pokemon}}
-    <li>{{this.name}}</li>
-  {{/each}}
+	<h1>Welcome to the online Pokedex!</h1>
+	
+	<div>
+		{{#if logged_in}}
+		<form action="/users/logout?_method=delete" method="POST">
+			<input type="submit" value="Log Out">
+		</form>
+		{{else}}
+		<a href="/users/login">Login</a>
+		<br><br>
+		{{/if}}
+
+	</div>
+
+	{{#each pokemon}}
+	<li>{{this.name}}</li>
+	{{/each}}
 </body>
 </html>
